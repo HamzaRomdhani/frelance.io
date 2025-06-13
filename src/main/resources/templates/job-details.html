@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Job Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+<div class="container mt-4" style="max-width: 700px;">
+    <h2 th:text="${job.jtittle}">Job Title</h2>
+    <h5 class="text-muted" th:text="${job.jcname}">Company Name</h5>
+
+    <p><strong>Description:</strong> <span th:text="${job.jobd}"></span></p>
+    <p><strong>Skills:</strong> <span th:text="${job.jskills}"></span></p>
+    <p><strong>Type:</strong> <span th:text="${job.jtype}"></span></p>
+    <p><strong>Salary:</strong> <span th:text="${job.jsalary}"></span></p>
+    <p><strong>Contact Email:</strong> <a th:href="'mailto:' + ${job.jcemail}" th:text="${job.jcemail}"></a></p>
+    <p><strong>About Company:</strong> <span th:text="${job.about}"></span></p>
+
+    <a th:href="@{/freelance/apply/{id}(id=${job.id})}" class="btn btn-primary mt-3">Apply</a>
+    <a href="/freelance/explorejob" class="btn btn-secondary mt-3 ms-2">Back to Jobs</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

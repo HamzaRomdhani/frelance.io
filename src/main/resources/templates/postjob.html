@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Post Job</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+<div class="container mt-5" style="max-width: 700px;">
+    <h2 class="mb-4 text-center">Add a Job Post</h2>
+
+    <form th:action="@{/company/postjob}" th:object="${postjob}" method="post" novalidate>
+        <div class="mb-3">
+            <label for="jtittle" class="form-label">Job Title</label>
+            <input type="text" th:field="*{jtittle}" id="jtittle" class="form-control" placeholder="Enter job title" required />
+        </div>
+
+        <div class="mb-3">
+            <label for="jobd" class="form-label">Job Description</label>
+            <textarea th:field="*{jobd}" id="jobd" class="form-control" rows="4" placeholder="Describe the job" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="jskills" class="form-label">Required Skills</label>
+            <input type="text" th:field="*{jskills}" id="jskills" class="form-control" placeholder="List required skills" />
+        </div>
+
+        <div class="mb-3">
+            <label for="jtype" class="form-label">Job Type</label>
+            <input type="text" th:field="*{jtype}" id="jtype" class="form-control" placeholder="Full-time, Part-time, etc." />
+        </div>
+
+        <div class="mb-3">
+            <label for="jsalary" class="form-label">Salary</label>
+            <input type="text" th:field="*{jsalary}" id="jsalary" class="form-control" placeholder="Enter salary or range" />
+        </div>
+
+        <div class="mb-3">
+            <label for="jcname" class="form-label">Company Name</label>
+            <input type="text" th:field="*{jcname}" id="jcname" class="form-control" placeholder="Enter company name" />
+        </div>
+
+        <div class="mb-3">
+            <label for="jcemail" class="form-label">Company Email</label>
+            <input type="email" th:field="*{jcemail}" id="jcemail" class="form-control" placeholder="Enter company email" />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Post Job</button>
+    </form>
+    <div th:if="${param.success}" class="alert alert-success mt-4 text-center" role="alert">
+        job added successful!
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

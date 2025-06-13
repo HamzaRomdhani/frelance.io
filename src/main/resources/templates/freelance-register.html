@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Freelancer Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" href="#">Freelancer Platform</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" th:href="@{/company/register}">Register Company</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#" th:href="@{/freelance/register}">Register Freelance</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="form-container shadow-sm">
+    <h2 class="mb-4 text-center text-primary">Register as Freelancer</h2>
+
+    <form th:action="@{/freelance/register}" th:object="${freelancer}" method="post" novalidate>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" th:field="*{name}" id="name" class="form-control" placeholder="Enter your full name" />
+            <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" th:field="*{email}" id="email" class="form-control" placeholder="Enter email" />
+            <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            <div class="text-danger" th:if="${emailError}" th:text="${emailError}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="date" class="form-label">Date of Birth</label>
+            <input type="date" th:field="*{date}" id="date" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label for="linkedin" class="form-label">LinkedIn Profile</label>
+            <input type="url" th:field="*{linkedin}" id="linkedin" class="form-control" placeholder="LinkedIn URL" />
+        </div>
+
+        <div class="mb-3">
+            <label for="number" class="form-label">Phone Number</label>
+            <input type="tel" th:field="*{number}" id="number" class="form-control" placeholder="Enter phone number" />
+            <div class="text-danger" th:if="${#fields.hasErrors('number')}" th:errors="*{number}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="education" class="form-label">Education</label>
+            <input type="text" th:field="*{education}" id="education" class="form-control" placeholder="Your education" />
+        </div>
+
+        <div class="mb-3">
+            <label for="profilef" class="form-label">Profile</label>
+            <textarea th:field="*{profilef}" id="profilef" class="form-control" rows="3" placeholder="Write your profile"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="charge" class="form-label">Charge</label>
+            <input type="text" th:field="*{charge}" id="charge" class="form-control" placeholder="Your charge rate" />
+        </div>
+
+        <div class="mb-3">
+            <label for="gender" class="form-label">Gender</label>
+            <select th:field="*{gender}" id="gender" class="form-select">
+                <option value="" disabled selected>Select gender</option>
+                <option value="Male" th:selected="${freelancer.gender == 'Male'}">Male</option>
+                <option value="Female" th:selected="${freelancer.gender == 'Female'}">Female</option>
+                <option value="Other" th:selected="${freelancer.gender == 'Other'}">Other</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="skills" class="form-label">Skills</label>
+            <textarea th:field="*{skills}" id="skills" class="form-control" rows="3" placeholder="List your skills"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" th:field="*{password}" id="password" class="form-control" placeholder="Enter password" />
+            <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="cpassword" class="form-label">Confirm Password</label>
+            <input type="password" th:field="*{cpassword}" id="cpassword" class="form-control" placeholder="Confirm password" />
+            <div class="text-danger" th:if="${#fields.hasErrors('cpassword')}" th:errors="*{cpassword}"></div>
+            <div class="text-danger" th:if="${passwordError}" th:text="${passwordError}"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 fs-5">Register Freelancer</button>
+    </form>
+
+    <div th:if="${param.success}" class="alert alert-success mt-4 text-center" role="alert">
+        Registration freelancer successful!
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard company</title>
+</head>
+<body>
+<h2>Welcome, <span th:text="${user.name}"></span></h2>
+
+<div th:if="${user != null and user.role == 'company'}">
+    <p>You are logged in as a <strong>Company</strong>.</p>
+    <a href="/company/dashboard">Go to Company Dashboard</a>
+    <a href="/company/postjob">Go to Post Job</a>
+    <a href="/company/postjob">Go to Post Job</a>
+    <a th:href="@{/company/condidatesapplications(name=${user.name})}">Go to condidates applications</a>
+
+</div>
+
+<a href="/logout">Logout</a>
+</body>
+</html>
