@@ -15,6 +15,19 @@ public abstract class User implements Serializable {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String number;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column
+    private String cpassword;
+
+
     public void setName(String name) {
         this.name = name;
     }
@@ -38,18 +51,6 @@ public abstract class User implements Serializable {
     public void setCpassword(String cpassword) {
         this.cpassword = cpassword;
     }
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String number;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column
-    private String cpassword;
 
 
     public String getEmail() {

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -23,16 +24,15 @@ public class JobApplicationDto {
     @NotBlank(message = "Candidate email is required")
     private String candidateemail;
 
-    @NotBlank(message = "Resume is required")
-    private String candidateresume;
+    private MultipartFile candidateresume;
 
     @NotBlank
-    private String cid; // job id as string
+    private String cid;
 
     @NotBlank
     private String companyemail;
 
-    private String status = "Pending"; // default status
+    private String status = "Send";
 
 
     public String getCompanyname() {
@@ -67,11 +67,11 @@ public class JobApplicationDto {
         this.candidateemail = candidateemail;
     }
 
-    public String getCandidateresume() {
+    public MultipartFile getCandidateresume() {
         return candidateresume;
     }
 
-    public void setCandidateresume(String candidateresume) {
+    public void setCandidateresume(MultipartFile candidateresume) {
         this.candidateresume = candidateresume;
     }
 

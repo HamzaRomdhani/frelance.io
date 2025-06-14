@@ -83,7 +83,8 @@
 
         <button type="submit" class="btn btn-success w-100">Login</button>
 <br><br>
-        <button action="/register" class="btn btn-success w-100">Register</button>
+        <a href="/company/register" class="btn btn-success w-40">Register as Company</a><p>  </p>
+        <a href="/freelance/register" class="btn btn-success w-40">Register as Freelancer</a>
         <p>Don't have account ?</p>
     </form>
     <div th:if="${param.success}" class="alert alert-success mt-4 text-center" role="alert">

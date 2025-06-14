@@ -49,19 +49,16 @@
     <div class="container position-relative d-flex align-items-center justify-content-between">
 
         <a href="/" class="logo d-flex align-items-center me-auto me-xl-0">
-            <!-- Uncomment the line below if you also wish to use an image logo -->
-            <!-- <img src="assets/img/logo.webp" alt=""> -->
             <h1 class="sitename">Frelancer.io</h1>
         </a>
 
         <nav id="navmenu" class="navmenu">
             <ul>
-                <li><a href="/" class="active">Home</a></li>
+                <li><a href="/dashboard" class="active">Home</a></li>
                 <li><a href="#about">About</a></li>
-                <li><a href="/login">Login as Freelancer</a></li>
-                <li><a href="/login">Login as Company</a></li>
-                <!--<li><a href="#pricing">Pricing</a></li>
-                <li><a href="#contact">Contact</a></li>-->
+                <!--<li><a th:href="/freelance/profile">Go to profile</a></li>
+                <li><a th:href="@{/company/condidatesapplications(name=${user.name})}">Go to condidates applications</a></li>-->
+                <li><a href="/logout" >Logout</a></li>
             </ul>
             <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
         </nav>
@@ -69,7 +66,50 @@
 
     </div>
 </header>
-<main class="main">
+
+<div th:if="${user != null and user.role == 'freelancer'}">
+    <main class="main">
+
+        <section id="hero" class="hero section dark-background">
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <div class="hero-content" data-aos="fade-up" data-aos-delay="200">
+                            <img th:src="${user.profilec != null ? user.profilec : 'https://via.placeholder.com/150'}"
+                                 alt="Profile Picture" class="profile-pic mb-3" width="70px" height="70px" style="border-radius: 20px"/><br>
+                            <h2>Welcome,<span th:text="${user.name}"></span></h2>
+                            <br><br>
+                            <div class="hero-btns">
+                                <a href="/freelance/explorejob" class="btn btn-primary">Explore jobs</a>
+                                <a th:href="@{/freelance/myapplications(email=${user.email})}" class="btn btn-outline">My Applications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="hero-image" data-aos="zoom-out" data-aos-delay="300">
+                            <img src="/assets/img/new/smiling-middle-aged-business-man.webp" alt="Consulting Services" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!-- /Hero Section -->
+
+
+        <!-- <p>You are logged in as a <strong>Company</strong>.</p>
+        -<a href="/company/dashboard">Go to Company Dashboard</a>
+         <a href="/company/postjob">Go to Post Job</a>
+         <a th:href="@{/company/viewprofilec(email=${user.email})}" >Go to profile</a>
+         <a th:href="@{/company/condidatesapplications(name=${user.name})}">Go to condidates applications</a>-->
+
+
+
+
+    </main>
+</div>
+
+
+
+<!--<main class="main">
 <h2>Welcome, <span th:text="${user.name}"></span></h2>
 
 <div th:if="${user != null and user.role == 'freelancer'}">
@@ -78,9 +118,10 @@
     <a href="/freelance/explorejob">Go to explore jobs</a>
     <a th:href="@{/freelance/myapplications(email=${user.email})}">Go to my applications</a>
 </div>
-
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 <a href="/logout">Logout</a>
-</main>
+</main>-->
 <br>
 <br>
 <br>

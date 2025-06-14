@@ -12,24 +12,30 @@ import java.util.UUID;
 //@Entity
 @Getter
 @Setter
-public class Postproject {
+public class ProjectApplications {
 
     @Id
     @Column(name = "id")
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    private String projectd;
+    private String projectname;
 
-    private String projectf;
 
-    private String projectb;
+    private String projectcompany;
 
-    private String projectt;
+    private String projectcompanyemail;
 
-    private String projects;
+    private String status;
 
-    private String projectc;
 
-    private String projecte;
+    private String candidatename;
+
+
+    private String candidateemail;
+
+
+    private String candidateresume;
+
+    private UUID cdid;
 }

@@ -21,6 +21,11 @@ public class Company extends User {
 
     private String website;
 
+    private String profilec;
+
+    @Column(length = 500)
+    private String about;
+
     public UUID getId() {
         return id;
     }
@@ -52,12 +57,6 @@ public class Company extends User {
     public void setAbout(String about) {
         this.about = about;
     }
-
-    private String profilec;
-
-    @Column(length = 500)
-    private String about;
-
 
 
 }

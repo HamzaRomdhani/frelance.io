@@ -2,9 +2,11 @@ package iteam.platform.freelancer.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -21,10 +23,13 @@ public class CompanyDto {
     @NotBlank(message = "Number is required")
     private String number;
 
-    //@URL(message = "Invalid website URL")
     private String website;
 
-    private String profilec;
+    @NotNull(message = "Profile picture is required")
+    private MultipartFile profilec;
+
+    private String profilecPath;
+
 
     private String about;
 
@@ -75,11 +80,19 @@ public class CompanyDto {
         this.website = website;
     }
 
-    public String getProfilec() {
+    public String getProfilecPath() {
+        return profilecPath;
+    }
+
+    public void setProfilecPath(String profilecPath) {
+        this.profilecPath = profilecPath;
+    }
+
+    public MultipartFile getProfilec() {
         return profilec;
     }
 
-    public void setProfilec(String profilec) {
+    public void setProfilec(MultipartFile profilec) {
         this.profilec = profilec;
     }
 

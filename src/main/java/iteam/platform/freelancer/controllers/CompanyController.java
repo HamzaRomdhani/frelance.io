@@ -6,12 +6,11 @@ import iteam.platform.freelancer.dtos.JobApplicationsStatusUpdateDto;
 import iteam.platform.freelancer.entities.Company;
 import iteam.platform.freelancer.entities.JobApplications;
 import iteam.platform.freelancer.entities.Postjob;
-import iteam.platform.freelancer.repositories.CompanyRepository;
-import iteam.platform.freelancer.repositories.JobApplicationsRepository;
-import iteam.platform.freelancer.repositories.PostJobRepository;
+import iteam.platform.freelancer.helper.LoggedInUser;
+import iteam.platform.freelancer.services.company.CompanyService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,8 +19,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,28 +32,11 @@ import java.util.UUID;
 @RequestMapping("/company")
 public class CompanyController {
 
-    private final CompanyRepository companyRepository;
-    private final PostJobRepository postjobRepository;
-    private final JobApplicationsRepository jobApplicationsRepository;
+    private final CompanyService companyService;
 
-
-
-    public CompanyController(CompanyRepository companyRepository,
-                              PostJobRepository postjobRepository,
-                             JobApplicationsRepository jobApplicationsRepository) {
-        this.postjobRepository = postjobRepository;
-        this.companyRepository = companyRepository;
-        this.jobApplicationsRepository = jobApplicationsRepository;
-
+    public CompanyController(CompanyService companyService) {
+        this.companyService = companyService;
     }
-
-
-
-//    @GetMapping("/register")
-//    public String showRegistrationForm(Model model) {
-//        model.addAttribute("company", new CompanyDto());
-//        return "register";
-//    }
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model, HttpServletRequest request) {
@@ -60,11 +45,15 @@ public class CompanyController {
         return "register";
     }
 
-
     @PostMapping("/register")
     public String registerCompany(@ModelAttribute("company") @Valid CompanyDto companyDto,
                                   BindingResult result,
-                                  Model model) {
+                                  Model model,
+                                  @RequestParam("profilec") MultipartFile profilec,
+                                  HttpServletRequest request) {
+
+        model.addAttribute("currentUri", request.getRequestURI());
+
         if (result.hasErrors()) {
             return "register";
         }
@@ -74,32 +63,105 @@ public class CompanyController {
             return "register";
         }
 
-        if (companyRepository.existsByEmail(companyDto.getEmail())) {
+        if (companyService.existsByEmail(companyDto.getEmail())) {
             model.addAttribute("emailError", "Email is already registered");
             return "register";
         }
 
+        if (companyDto.getProfilec().isEmpty()) {
+            model.addAttribute("imageError", "Please select an image");
+            return "register";
+        }
+
+        if (!Arrays.asList("image/jpeg", "image/png", "image/gif").contains(companyDto.getProfilec().getContentType())) {
+            model.addAttribute("imageError", "Only JPG, PNG, and GIF files are allowed");
+            return "register";
+        }
+
+        if (companyDto.getProfilec().getSize() > 5 * 1024 * 1024) {
+            model.addAttribute("imageError", "File must be less than 5MB");
+            return "register";
+        }
+        try {
+            String imagePath = companyService.saveImage(companyDto.getProfilec());
+            companyDto.setProfilecPath(imagePath);
+        } catch (IOException e) {
+            model.addAttribute("imageError", "Failed to upload profile picture");
+            return "register";
+        }
+
         Company company = new Company();
-        BeanUtils.copyProperties(companyDto, company);
 
-        System.out.println("Saving company with email: " + company.getEmail());
+        company.setName(companyDto.getName());
+        company.setEmail(companyDto.getEmail());
+        company.setPassword(companyDto.getPassword());
+        company.setNumber(companyDto.getNumber());
+        company.setWebsite(companyDto.getWebsite());
+        company.setAbout(companyDto.getAbout());
+        company.setProfilec(companyDto.getProfilecPath());
 
-        companyRepository.save(company);
 
+        companyService.saveCompany(company);
 
-        //return "redirect:/company/register?success";
         return "redirect:/login";
     }
 
+    @GetMapping("/viewprofilec")
+    public String getMyProfilec(@RequestParam("email") String email, Model model) {
+        Company company = companyService.findByEmail(email);
+        if (company == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("company", company);
+        return "profilec";
+    }
 
 
+    @PostMapping("/updateProfile")
+    public String updateProfile(
+            @RequestParam("name") String name,
+            @RequestParam("website") String website,
+            @RequestParam("about") String about,
+            @RequestParam("profilec") MultipartFile profilec,
+            @RequestParam("email") String email,
+            HttpSession session,
+            RedirectAttributes redirectAttrs) {
 
+        LoggedInUser user = (LoggedInUser) session.getAttribute("user");
+        if (user == null || !user.getRole().equals("company")) {
+            return "redirect:/login";
+        }
+
+        try {
+            Company company = companyService.findByEmail(email);
+
+            company.setName(name);
+            company.setWebsite(website);
+            company.setAbout(about);
+
+            if (!profilec.isEmpty()) {
+                String imagePath = companyService.saveImage(profilec);
+                company.setProfilec(imagePath);
+            }
+
+            companyService.saveCompany(company);
+
+            redirectAttrs.addFlashAttribute("successMessage", "✅ Profile updated successfully!");
+
+        } catch (IOException e) {
+            redirectAttrs.addFlashAttribute("errorMessage", "❌ Failed to upload image.");
+            return "redirect:/profilec";
+        }
+
+        return "redirect:/dashboard";
+    }
 
 
     @GetMapping("/postjob")
     public String showPostJobForm(Model model) {
         model.addAttribute("postjob", new Postjob());
-        return "postjob"; // Thymeleaf template name
+        return "postjob";
     }
 
     @PostMapping("/postjob")
@@ -110,24 +172,30 @@ public class CompanyController {
             return "postjob";
         }
 
-        postjobRepository.save(postjob);
+        companyService.saveJob(postjob);
 
-        // Redirect or show success message
         return "redirect:/company/postjob?success";
     }
 
 
     @GetMapping("/condidatesapplications")
     public String getMyApplications(@RequestParam("name") String name, Model model) {
-        List<JobApplications> applications = jobApplicationsRepository.findByCompanyname(name);
+        List<JobApplications> applications = companyService.findByCompanyname(name);
         model.addAttribute("applications", applications);
-        return "condidate-application"; // Thymeleaf template to show applications
+        return "condidate-application";
     }
 
     @PostMapping("/updateApplicationStatus")
     public String updateApplicationStatus(@Valid JobApplicationsStatusUpdateDto dto,
                                           BindingResult result,
-                                          RedirectAttributes redirectAttributes) {
+                                          RedirectAttributes redirectAttributes,
+                                          HttpSession session) {
+
+        LoggedInUser user = (LoggedInUser) session.getAttribute("user");
+        if (user == null || !user.getRole().equals("company")) {
+            return "redirect:/login";
+        }
+
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Invalid data submitted. Please check and try again.");
             return "redirect:/company/condidatesapplications?error";
@@ -139,11 +207,11 @@ public class CompanyController {
             try {
                 UUID id = UUID.fromString(appDto.getId());
 
-                Optional<JobApplications> optionalApp = jobApplicationsRepository.findById(id);
+                Optional<JobApplications> optionalApp = companyService.findById(id);
                 if (optionalApp.isPresent()) {
                     JobApplications app = optionalApp.get();
                     app.setStatus(appDto.getStatus());
-                    jobApplicationsRepository.save(app);
+                    companyService.saveJobApplications(app);
 
                 } else {
                     allFound = false;
@@ -154,16 +222,13 @@ public class CompanyController {
         }
 
         if (allFound) {
-            redirectAttributes.addFlashAttribute("successMessage", "All application statuses updated successfully.");
-            return "redirect:/dashboardc";
+            redirectAttributes.addFlashAttribute("successMessage", "✅ Status was updated successfully.");
+            return "redirect:/dashboard";
         }
-        return "dashboard";
+        redirectAttributes.addFlashAttribute("successMessage", "✅ Status was updated successfully.");
+
+        return "redirect:/dashboard";
     }
-
-
-
-
-
 
 
 }

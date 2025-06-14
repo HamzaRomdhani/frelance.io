@@ -8,6 +8,7 @@ import iteam.platform.freelancer.entities.JobApplications;
 import iteam.platform.freelancer.repositories.FreelancerRepository;
 import iteam.platform.freelancer.repositories.JobApplicationsRepository;
 import iteam.platform.freelancer.services.JobService;
+import iteam.platform.freelancer.utils.FileUploadUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,14 +34,18 @@ public class FreelancerController {
     private final FreelancerRepository freelancerRepository;
     private final JobApplicationsRepository jobApplicationsRepository;
     private final JobService jobService;
+    private final FileUploadUtil fileUploadUtil;
+
 
 
     public FreelancerController(FreelancerRepository freelancerRepository,
                                 JobService jobService,
-                                JobApplicationsRepository jobApplicationsRepository) {
+                                JobApplicationsRepository jobApplicationsRepository,
+                                FileUploadUtil fileUploadUtil) {
         this.freelancerRepository = freelancerRepository;
         this.jobService = jobService;
         this.jobApplicationsRepository = jobApplicationsRepository;
+        this.fileUploadUtil = fileUploadUtil;
     }
 
 
@@ -86,7 +93,7 @@ public class FreelancerController {
     public String exploreJobs(Model model) {
         List<ShowJob> jobs = jobService.getRandomJobs();
         model.addAttribute("jobdataofcompany", jobs);
-        return "explorejobs"; // your Thymeleaf template
+        return "explorejobs";
     }
 
     @GetMapping("/job/view/{id}")
@@ -96,13 +103,12 @@ public class FreelancerController {
             return "redirect:/explorejobs?error=notfound";
         }
         model.addAttribute("job", job);
-        return "job-details"; // Thymeleaf template for job details
+        return "job-details";
     }
 
 
 
 
-    // Show apply form pre-filled with job info
     @GetMapping("/apply/{id}")
     public String showApplyForm(@PathVariable("id") UUID jobId, Model model) {
         ShowJob job = jobService.getJobById(jobId);
@@ -122,40 +128,50 @@ public class FreelancerController {
         return "apply-job";
     }
 
-    // Handle form submission
     @PostMapping("/apply")
     public String submitApplication(@ModelAttribute("application") @Valid JobApplicationDto applicationDto,
                                     BindingResult result,
-                                    Model model) {
+                                    Model model,
+                                    @RequestParam("candidateresume") MultipartFile candidateresume) {
+
         if (result.hasErrors()) {
-            // Re-populate job info for the form
             ShowJob job = jobService.getJobById(UUID.fromString(applicationDto.getCid()));
             model.addAttribute("job", job);
             return "apply-job";
         }
 
-        // Map DTO to entity
-        JobApplications application = new JobApplications();
-        application.setCompanyname(applicationDto.getCompanyname());
-        application.setPosition(applicationDto.getPosition());
-        application.setCandidatename(applicationDto.getCandidatename());
-        application.setCandidateemail(applicationDto.getCandidateemail());
-        application.setCandidateresume(applicationDto.getCandidateresume());
-        application.setCid(UUID.fromString(applicationDto.getCid()));
-        application.setCompanyemail(applicationDto.getCompanyemail());
-        application.setStatus("Pending");
+        try {
+            String resumePath = fileUploadUtil.saveResume(candidateresume);
 
-        jobApplicationsRepository.save(application);
+            JobApplications application = new JobApplications();
+            application.setCompanyname(applicationDto.getCompanyname());
+            application.setPosition(applicationDto.getPosition());
+            application.setCandidatename(applicationDto.getCandidatename());
+            application.setCandidateemail(applicationDto.getCandidateemail());
+            application.setCandidateresume(resumePath); // Save resume path
+            application.setCid(UUID.fromString(applicationDto.getCid()));
+            application.setCompanyemail(applicationDto.getCompanyemail());
+            application.setStatus("Send");
 
-        return "redirect:/freelance/explorejob?Success";
+            jobApplicationsRepository.save(application);
+
+            return "redirect:/freelance/explorejob?Success";
+
+        } catch (IOException e) {
+            model.addAttribute("resumeError", "Failed to upload resume. Please try again.");
+            ShowJob job = jobService.getJobById(UUID.fromString(applicationDto.getCid()));
+            model.addAttribute("job", job);
+            return "apply-job";
+        }
     }
+
 
 
     @GetMapping("/myapplications")
     public String getMyApplications(@RequestParam("email") String email, Model model) {
         List<JobApplications> applications = jobApplicationsRepository.findByCandidateemail(email);
         model.addAttribute("applications", applications);
-        return "my-applications"; // Thymeleaf template to show applications
+        return "my-applications";
     }
 
 
